@@ -1,0 +1,54 @@
+package x
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"towncrier/reporter/internal/models"
+)
+
+type XClient struct {
+	token  string
+	client *http.Client
+}
+
+func NewXClient(token string) *XClient {
+	return &XClient{
+		token:  token,
+		client: &http.Client{},
+	}
+}
+
+func (xc *XClient) FetchTweets(username string, lastId string) ([]models.Tweet, error) {
+	var tweets []models.Tweet
+	// create a url
+	url := fmt.Sprintf("https://api.twitter.com/2/tweets/search/recent?query=from:%s&since_id=%s", username, lastId)
+	log.Printf("Fetching tweets from URL: %s", url)
+	// create a request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Printf("Error creating request: %v", err)
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+xc.token)
+	// get the response
+	resp, err := xc.client.Do(req)
+	if err != nil {
+		log.Printf("Error making request: %v", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+	log.Printf("Response status: %s", resp.Status)
+	// decode response
+	var result struct {
+		Data []models.Tweet `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		log.Printf("Error decoding response: %v", err)
+		return nil, err
+	}
+	tweets = append(tweets, result.Data...)
+	log.Printf("Fetched %d tweets", len(tweets))
+	return tweets, nil
+}
