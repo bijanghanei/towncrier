@@ -8,6 +8,7 @@ services:
       X_BEARER_TOKEN: AAAAAAAAAAAAAAAAAAAAAOP1xgEAAAAAxN2f23XQ7aIGdmcfNTyxyNbkUmw%3DcOeCVsuDahlA0Dq9LI54i5Ox3to7stwggnTRlRvRN3G0uYQ8R8R8
       X_USERNAMES: IranInt,bbcpersian
       KAFKA_BROKER: kafka:9092
+      KAFKA_TOPIC: x_topic
       REDIS_ADDR: redis:6379
       REDIS_PASSWORD: password
 
