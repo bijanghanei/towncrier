@@ -1,8 +1,8 @@
-package gctcbot
+package main
 
 import (
-	"context"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -39,11 +39,11 @@ type UpdatesResponse struct {
 }
 
 var (
-	words      []string
-	running    bool
-	mutex      sync.Mutex
-	stopChan   chan struct{}
-	channelID  int64
+	words     []string
+	running   bool
+	mutex     sync.Mutex
+	stopChan  chan struct{}
+	channelID int64
 )
 
 func main() {

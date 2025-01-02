@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	towncrierconsumer "towncrier/publisher/internal/kafka"
+	"towncrier/publisher/internal/telegram"
 
 	"towncrier/publisher/external/models"
 	"towncrier/publisher/internal/filter"
@@ -23,6 +25,8 @@ var (
 
 func main() {
 	lastUpdateId := 0
+	tgApiUrl := os.Getenv("TELEGRAM_API_USRL")
+	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	go func() {
 		consumer, err := towncrierconsumer.CreateConsumer([]string{os.Getenv("KAFKA_BROKER")}, os.Getenv("KAFKA_TOPIC"))
 		if err != nil {
@@ -63,7 +67,7 @@ func main() {
 						pass := filter.FilterTweet(tweet, keywords)
 						mutex.Lock()
 						if pass && running && channelId != 0 {
-							// send message to telegram
+							// send message to telegram channel
 						}
 						mutex.Unlock()
 
@@ -74,11 +78,36 @@ func main() {
 		wg.Wait()
 	}()
 
-
 	for {
-		// Wait for new texts the user sends
-		// fetch the message user sent (getUodates)
+		updates, err := bot.GetUpdates(tgApiUrl, botToken, lastUpdateId)
+		if err != nil {
+			log.Printf("failed to fetch updates : %v", err)
+		}
 
-		// process user's message and add their words if they were not in the list
+		for _, update := range updates {
+			lastUpdateId = update.UpdateId + 1
+			switch strings.ToLower(update.Message.Text) {
+			case "/start":
+				if !running {
+					running = true
+					bot.SendMessage(update.Message.Chat.Id, "Hello, welcome to the Town Crier. In order to filter news based on your words,give me your words as the example below: word1,word2,word3"
+					, tgApiUrl, botToken)
+				} else {
+					bot.SendMessage(update.Message.Chat.Id, "Town Crier is already started and he's doing his job!", tgApiUrl, botToken)
+				}
+			case "/stop":
+				// if not stopped : close stopChan terminate the loop else sendMessage that the but is stopped already
+				if running {
+					running = false
+					close(stopChan)
+					bot.SendMessage(update.Message.Chat.Id, "Town Crier can't wait to see you agian!", tgApiUrl, botToken)
+				} else {
+					bot.SendMessage(update.Message.Chat.Id, "Town Crier is off already!", tgApiUrl, botToken)
+				}
+			default:
+				// if running get keywords else ask to first /start the bot
+				
+			}
+		}
 	}
 }
