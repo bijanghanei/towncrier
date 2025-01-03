@@ -24,8 +24,12 @@ func NewXClient(token string) *XClient {
 
 func (xc *XClient) FetchTweets(username string, lastId string) ([]models.Tweet, error) {
 	var tweets []models.Tweet
-	// create a url
 	url := fmt.Sprintf("https://api.twitter.com/2/tweets/search/recent?query=from:%s&since_id=%s", username, lastId)
+	if lastId == "" {
+		url = fmt.Sprintf("https://api.twitter.com/2/tweets/search/recent?query=from:%s&max_results=5", username)
+	}
+	log.Printf("**** last id : %v", lastId)
+	// create a url
 	log.Printf("Fetching tweets from URL: %s", url)
 	// create a request
 	req, err := http.NewRequest("GET", url, nil)
