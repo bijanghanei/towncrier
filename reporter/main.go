@@ -32,6 +32,7 @@ func main() {
 			go checkForUpdates(topic, username, rc, xc, producer, &wg)
 		}
 		wg.Wait()
+		log.Print("no updates I'm sleeping")
 		time.Sleep(1 * time.Hour)
 	}
 }
@@ -59,6 +60,7 @@ func checkForUpdates(topic string, username string, rc *storage.RedisStorage, xc
 	}
 
 	for _, tweet := range tweets {
+		log.Printf("Tweet is sent %v", tweet.Text)
 		err := producer.SendMessage(topic, username, tweet)
 		if err != nil {
 			log.Printf("failed to send tweet { %v } to with username { %v } : %v", tweet, username, err)

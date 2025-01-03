@@ -10,7 +10,7 @@ import (
 )
 
 // https://api.telegram.org/bot<token>/METHOD_NAME
-const baseUrl string = "https://api.telegram.org/bot"
+// const baseUrl string = "https://api.telegram.org/bot"
 
 type Update struct {
 	UpdateId int `json:"update_id"`

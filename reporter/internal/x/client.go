@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 	"towncrier/reporter/internal/models"
 )
 
@@ -39,6 +41,17 @@ func (xc *XClient) FetchTweets(username string, lastId string) ([]models.Tweet, 
 		return nil, err
 	}
 	defer resp.Body.Close()
+	log.Printf("X-Rate-Limit-Remaining: %s", resp.Header.Get("X-Rate-Limit-Remaining"))
+	log.Printf("X-Rate-Limit-Reset: %s", resp.Header.Get("X-Rate-Limit-Reset"))
+	remainingRequests := resp.Header.Get("X-Rate-Limit-Remaining")
+    resetTimestamp := resp.Header.Get("X-Rate-Limit-Reset")
+    if remainingRequests == "0" {
+        // If no remaining requests, sleep until rate limit is reset
+        resetTime, _ := strconv.ParseInt(resetTimestamp, 10, 64)
+		resetDuration := time.Until(time.Unix(resetTime, 0))
+        log.Printf("Rate limit exceeded, sleeping for %v", resetDuration)
+        time.Sleep(resetDuration)
+    }
 	log.Printf("Response status: %s", resp.Status)
 	// decode response
 	var result struct {

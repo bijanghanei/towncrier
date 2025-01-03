@@ -1,16 +1,29 @@
 version: '3.8'
 
 services:
+  towncrier-publisher:
+      build: 
+        context: ./publisher
+      environment:
+        KAFKA_BROKER: kafka:9092
+        KAFKA_TOPIC: x_topic
+        # REDIS_ADDR: redis:6379
+        # REDIS_PASSWORD: password
+        TELEGRAM_API_URL: https://api.telegram.org
+        TELEGRAM_BOT_TOKEN: 7774689905:AAEcmR_WZ6sFkxVULVN5laZ-_IU2J6Xl-ao
+      depends_on:
+        - towncrier-reporter
   towncrier-reporter:
     build: 
       context: ./reporter
     environment:
-      X_BEARER_TOKEN: AAAAAAAAAAAAAAAAAAAAAOP1xgEAAAAAxN2f23XQ7aIGdmcfNTyxyNbkUmw%3DcOeCVsuDahlA0Dq9LI54i5Ox3to7stwggnTRlRvRN3G0uYQ8R8R8
-      X_USERNAMES: IranInt,bbcpersian
+      X_BEARER_TOKEN: AAAAAAAAAAAAAAAAAAAAAOP1xgEAAAAAArjOtPEDZF%2F1HRyoyCQFP5MMlw4%3Dbfh3egA3t7tVs8KkVJpJn5swLY1T0C8vLvExydi5n9ETRNLEYR
+      X_USERNAMES: IranIntl,bbcpersian
       KAFKA_BROKER: kafka:9092
       KAFKA_TOPIC: x_topic
       REDIS_ADDR: redis:6379
       REDIS_PASSWORD: password
+
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
