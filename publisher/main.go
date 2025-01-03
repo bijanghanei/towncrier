@@ -102,6 +102,7 @@ func main() {
 			case "/start":
 				if !running {
 					running = true
+					channelId = update.Message.Chat.Id
 					bot.SendMessage(update.Message.Chat.Id, "Hello, welcome to the Town Crier. In order to filter news based on your words,give me your words as the example below: word1,word2,word3", tgApiUrl, botToken)
 				} else {
 					bot.SendMessage(update.Message.Chat.Id, "Town Crier is already started and he's doing his job!", tgApiUrl, botToken)
@@ -110,16 +111,22 @@ func main() {
 				// if not stopped : close stopChan terminate the loop else sendMessage that the but is stopped already
 				if running {
 					running = false
+					keywords = nil
 					close(stopChan)
+					close(readyChan)
 					bot.SendMessage(update.Message.Chat.Id, "Town Crier can't wait to see you agian!", tgApiUrl, botToken)
 				} else {
 					bot.SendMessage(update.Message.Chat.Id, "Town Crier is off already!", tgApiUrl, botToken)
 				}
 			default:
-				// if running get keywords else ask to first /start the bot
-				keywords = strings.Split(update.Message.Text, ",")
-				time.Sleep(3*time.Second)
-				readyChan <- struct{}{}
+				if running {
+					keywords = strings.Split(update.Message.Text, ",")
+					time.Sleep(3*time.Second)
+					readyChan <- struct{}{}
+				} else {
+					bot.SendMessage(update.Message.Chat.Id, "Town Crier is not started start by sending /start!", tgApiUrl, botToken)
+
+				}
 			}
 			mutex.Unlock()
 		}
