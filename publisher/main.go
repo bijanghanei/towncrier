@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 	towncrierconsumer "towncrier/publisher/internal/kafka"
 	"towncrier/publisher/internal/telegram"
 
@@ -19,14 +20,21 @@ var (
 	keywords  []string
 	running   bool
 	stopChan  chan struct{}
+	readyChan chan struct{}
 	mutex     sync.Mutex
 	channelId int
 )
 
+
 func main() {
+
 	lastUpdateId := 0
 	tgApiUrl := os.Getenv("TELEGRAM_API_USRL")
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+	readyChan = make(chan struct{}, 1)
+	stopChan = make(chan struct{})
+
+
 	go func() {
 		consumer, err := towncrierconsumer.CreateConsumer([]string{os.Getenv("KAFKA_BROKER")}, os.Getenv("KAFKA_TOPIC"))
 		if err != nil {
@@ -50,6 +58,9 @@ func main() {
 					return
 				}
 				defer cp.Close()
+
+				<-readyChan // Blocks until keywords is set
+
 				for {
 					select {
 					case <-stopChan:
@@ -85,13 +96,13 @@ func main() {
 		}
 
 		for _, update := range updates {
+			mutex.Lock()
 			lastUpdateId = update.UpdateId + 1
 			switch strings.ToLower(update.Message.Text) {
 			case "/start":
 				if !running {
 					running = true
-					bot.SendMessage(update.Message.Chat.Id, "Hello, welcome to the Town Crier. In order to filter news based on your words,give me your words as the example below: word1,word2,word3"
-					, tgApiUrl, botToken)
+					bot.SendMessage(update.Message.Chat.Id, "Hello, welcome to the Town Crier. In order to filter news based on your words,give me your words as the example below: word1,word2,word3", tgApiUrl, botToken)
 				} else {
 					bot.SendMessage(update.Message.Chat.Id, "Town Crier is already started and he's doing his job!", tgApiUrl, botToken)
 				}
@@ -106,8 +117,11 @@ func main() {
 				}
 			default:
 				// if running get keywords else ask to first /start the bot
-				
+				keywords = strings.Split(update.Message.Text, ",")
+				time.Sleep(3*time.Second)
+				readyChan <- struct{}{}
 			}
+			mutex.Unlock()
 		}
 	}
 }
