@@ -28,6 +28,7 @@ func (p *Producer) SendMessage(topic string, username string, message any) error
 	if err != nil {
 		return err
 	}
+	log.Printf("SendMessage marshaled : %v", msg)
 	_, _, err = p.producer.SendMessage(&sarama.ProducerMessage{
 		Topic: topic,
 		Key: sarama.StringEncoder(username),
