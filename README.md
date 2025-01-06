@@ -1,6 +1,6 @@
 # TOWNCRIER
 
-This project consists of two microservices , repoter and publisher. The reporter miroservice has the resposiblity to fetch news from X (formely twitter) and send them in kafka partions related to each username. The publisher microservice has the responsiblity to filter the tweets in the kafka topic and partions based on specific words and publish them to any telegram chat that has @towncrier telegram bot.
+This project consists of two microservices , repoter and publisher. The reporter miroservice has the resposiblity to fetch news from X (formely twitter) and send them in kafka partions related to each username. The publisher microservice has the responsiblity to filter the tweets in the kafka topic and partions based on specific words and publish them to any telegram chat that has @towncrierrbot telegram bot.
 
 ## Setup
 
