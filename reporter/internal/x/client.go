@@ -24,9 +24,9 @@ func NewXClient(token string) *XClient {
 
 func (xc *XClient) FetchTweets(username string, lastId string) ([]models.Tweet, error) {
 	var tweets []models.Tweet
-	url := fmt.Sprintf("https://api.twitter.com/2/tweets/search/recent?query=from:%s&since_id=%s", username, lastId)
+	url := fmt.Sprintf("https://api.twitter.com/2/tweets/search/recent?query=from:%s&since_id=%s&max_results=50", username, lastId)
 	if lastId == "" {
-		url = fmt.Sprintf("https://api.twitter.com/2/tweets/search/recent?query=from:%s&max_results=5", username)
+		url = fmt.Sprintf("https://api.twitter.com/2/tweets/search/recent?query=from:%s&max_results=10", username)
 	}
 	log.Printf("**** last id : %v", lastId)
 	// create a url
@@ -47,9 +47,9 @@ func (xc *XClient) FetchTweets(username string, lastId string) ([]models.Tweet, 
 	defer resp.Body.Close()
 	log.Printf("X-Rate-Limit-Remaining: %s", resp.Header.Get("X-Rate-Limit-Remaining"))
 	log.Printf("X-Rate-Limit-Reset: %s", resp.Header.Get("X-Rate-Limit-Reset"))
-	remainingRequests := resp.Header.Get("X-Rate-Limit-Remaining")
+	// remainingRequests := resp.Header.Get("X-Rate-Limit-Remaining")
     resetTimestamp := resp.Header.Get("X-Rate-Limit-Reset")
-    if remainingRequests == "0" {
+    if resp.StatusCode == 429 {
         // If no remaining requests, sleep until rate limit is reset
         resetTime, _ := strconv.ParseInt(resetTimestamp, 10, 64)
 		resetDuration := time.Until(time.Unix(resetTime, 0))

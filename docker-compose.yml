@@ -10,14 +10,14 @@ services:
         # REDIS_ADDR: redis:6379
         # REDIS_PASSWORD: password
         TELEGRAM_API_URL: https://api.telegram.org
-        TELEGRAM_BOT_TOKEN: 7774689905:AAEcmR_WZ6sFkxVULVN5laZ-_IU2J6Xl-ao
+        TELEGRAM_BOT_TOKEN: 
       depends_on:
         - towncrier-reporter
   towncrier-reporter:
     build: 
       context: ./reporter
     environment:
-      X_BEARER_TOKEN: AAAAAAAAAAAAAAAAAAAAAOP1xgEAAAAAArjOtPEDZF%2F1HRyoyCQFP5MMlw4%3Dbfh3egA3t7tVs8KkVJpJn5swLY1T0C8vLvExydi5n9ETRNLEYR
+      X_BEARER_TOKEN: 
       X_USERNAMES: IranIntl,bbcpersian
       KAFKA_BROKER: kafka:9092
       KAFKA_TOPIC: x_topic
