@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	topic := os.Getenv("KAFKA_TOPIC")
 	// get the list of keywords and pages
 	usernames := strings.Split(os.Getenv("X_USERNAMES"), ",")
 	// get token
@@ -28,14 +29,15 @@ func main() {
 		var wg sync.WaitGroup
 		for _, username := range usernames {
 			wg.Add(1)
-			go checkForUpdates(username, rc, xc, producer, &wg)
+			go checkForUpdates(topic, username, rc, xc, producer, &wg)
 		}
 		wg.Wait()
+		log.Print("no updates I'm sleeping")
 		time.Sleep(1 * time.Hour)
 	}
 }
 
-func checkForUpdates(username string, rc *storage.RedisStorage, xc *x.XClient, producer *kafka.Producer, wg *sync.WaitGroup) {
+func checkForUpdates(topic string, username string, rc *storage.RedisStorage, xc *x.XClient, producer *kafka.Producer, wg *sync.WaitGroup) {
 	defer wg.Done()
 	// GET THE ID OF LAST TWEET WAS FETCHED
 	lastId, err := rc.GetLastTweetId(username)
@@ -58,7 +60,8 @@ func checkForUpdates(username string, rc *storage.RedisStorage, xc *x.XClient, p
 	}
 
 	for _, tweet := range tweets {
-		err := producer.SendMessage("x_topic", username, tweet)
+		log.Printf("Tweet is sent %v", tweet.Text)
+		err := producer.SendMessage(topic, username, tweet)
 		if err != nil {
 			log.Printf("failed to send tweet { %v } to with username { %v } : %v", tweet, username, err)
 		} else {
