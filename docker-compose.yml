@@ -18,7 +18,7 @@ services:
       context: ./reporter
     environment:
       X_BEARER_TOKEN: 
-      X_USERNAMES: IranIntl,bbcpersian
+      X_USERNAMES: 
       KAFKA_BROKER: kafka:9092
       KAFKA_TOPIC: x_topic
       REDIS_ADDR: redis:6379
